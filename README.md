@@ -1,8 +1,8 @@
-#Unit Teszt keretrendszer
+## Unit Teszt keretrendszer
 
 Vállalati információs rendszerek kötelező program.
 
-##A feladat:
+## A feladat:
 **VIR1:** Egyszerű unit test futtató keretrendszer annotációk segítségével. Valósítsunk meg egy a 
 JUnit-hoz hasonló funkcionalitást, azaz olyan annotációkat, amelyek segítségével unit testek hajthatók 
 végre. A minimálisan támogatandó annotációk a következők: @TestCase, @BeforeClass, @AfterClass, @Before, 
@@ -14,7 +14,7 @@ azt előtte/utána közvetlenül meghívja. Ha vannak @BeforeClass/@AfterClass a
 akkor azokat egyetlen egyszer a tesztek futtatása előtt/után végrehajtja. Ha egy metódus annotálva van 
 a @Test annotációval, de egy @Skip is rá van téve, akkor azt a tesztet mégsem kell végrehajtani.
 
-##Tesztek működése:
+## Tesztek működése:
 Minden @Test-tel annotált metódusnak **boolean** visszatérési értékűnek kell lennie (még akkor is, 
 ha kivételt várunk tőle). Azt, hogy milyen értéket várunk a teszttől az @AssertTrue, @AssertFalse 
 és @AssertThrow(exception) annotációkkal lehet jelezni (nem kell, alapértelmezetten true az elvárt). 
@@ -23,18 +23,18 @@ Tesztmetódusnak nem lehet paramétere.
 A teszt sikeres lesz, ha az elvárt boolean értéket adja vissza, vagy elvárt kivétel esetén ténylegesen 
 dobja a kivételt.
 
-##Before, After működése
+## Before, After működése
 MÉG NINCSENEK IMPLEMENTÁLVA.
 ~~Ezek az annotációk a feladat leírása szerint működnek.~~
 
-##Tesztek eredménye:
+## Tesztek eredménye:
 Az eredmény egy TestResult objektumban jön vissza, ami toString-el formázottan jeleníthető meg, 
 vagy el lehet kérni külön külön a dolgokat, pl az egyes metódusok eredményeit.
 
-##Hibás teszt osztályok, teszt metódusok.
+## Hibás teszt osztályok, teszt metódusok.
 Ha a teszt osztály hibás (nincs @TestCase, nincs default konstruktor, stb...) akkor TestException 
 dobódik. Ha egy metódus nem megfelelő teszt metódus (pl van paramétere vagy nem bool a visszatérési 
 értéke) akkor az ignorálva lesz.
 
-#Példakódok, tesztek
+## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az *src/test/java* mappában találhatóak.
