@@ -25,6 +25,8 @@ public class TestRunner {
 	private final Class<?> clazz;
 	/** Listazza az osztaly teszteleshez kapcsolodo metodusait. */
 	private final MethodCollector methodCollector;
+	/** A teszt eredmenyeit, warningokat gyujt ossze. */
+	private TestResult.Builder resultBuilder = new TestResult.Builder();
 	
 	/** Privat konstruktor. */
 	private TestRunner(Class<?> clazz) throws TestException {
@@ -38,7 +40,7 @@ public class TestRunner {
 			//vagy nem letezik vagy nem hivhato meg
 			throw new TestException("Default constructor not found or cannot be called on class " + clazz.getSimpleName());
 		}
-		this.methodCollector = new MethodCollector(clazz); //metodus listazas itt megtortenik
+		this.methodCollector = new MethodCollector(clazz, resultBuilder); //metodus listazas itt megtortenik
 	}
 	
 	/**
@@ -89,7 +91,6 @@ public class TestRunner {
 	 * @return A teszt eredmenyt tartalmazo objektum.
 	 */
 	private TestResult doClassTest() throws IllegalAccessException, InstantiationException, TestException {
-		TestResult.Builder resultBuilder = new TestResult.Builder();
 		resultBuilder.withClassName(clazz.getName());
 		final Object testInstance = clazz.newInstance(); //default konstruktorral peldanyositas
 		//tesztmetodusok iteralasa

@@ -15,6 +15,7 @@ import com.gaspar.unittest.annotations.Before;
 import com.gaspar.unittest.annotations.BeforeClass;
 import com.gaspar.unittest.annotations.Skip;
 import com.gaspar.unittest.annotations.Test;
+import com.gaspar.unittest.results.TestResult;
 
 /**
  * Listakba szedi a kapott osztaly metodusait, az alapjan, hogy milyen annotacioik vannak.
@@ -34,11 +35,12 @@ class MethodCollector {
 	/** Az osztaly tesztelese utan egyszer futtatando metodusok. */
 	private final List<Method> afterAllMethods = new ArrayList<>();
 	
-	/** A listazas soran talalt problemak. */
+	/** A listazas soran talalt problemakat gyujti ossze. */
+	private final TestResult.Builder resultBuilder;
 	
-	
-	MethodCollector(Class<?> clazz) {
+	MethodCollector(Class<?> clazz, final TestResult.Builder resultBuilder) {
 		methods = Arrays.asList(clazz.getDeclaredMethods());
+		this.resultBuilder = resultBuilder;
 		listMethods(); //azonnal listaz
 	}
 	
@@ -78,15 +80,31 @@ class MethodCollector {
 	 *  	- boolean a visszateresi erteke (meg akkor is, ha kivetelt varunk el tole)
 	 */
 	private boolean validTestMethod(final Method method) {
-		if(!method.isAnnotationPresent(Test.class)) return false; //@Test nelkul biztos nem jo
+		boolean isValid = true;
+		if(!method.isAnnotationPresent(Test.class)) {
+			//@Test nelkul biztos nem jo teszt metodus (de ez nem warning, lehetnek nem teszt metodusok is)
+			return false; //visszateres, hogy a tobbi warning ne adodjon hozza ehhez a metodushoz
+		}
 		//van @Test, elvart ertek keresese
-		if(!correctAssertValue(method)) return false; //elvart ertek nem megfeleloen jelezve
+		if(!correctAssertValue(method)) { //elvart ertek nem megfeleloen jelezve
+			resultBuilder.addWarning(method.getName() + ": this test method has multiple asserted values, so it's ignored.");
+			isValid = false; 
+		}
 		//van, Test, elvart ertek megfelelo, mas nem lehet
-		if(hasAnyAnnotation(method, Before.class, After.class, BeforeClass.class, AfterClass.class)) return false;
+		if(hasAnyAnnotation(method, Before.class, After.class, BeforeClass.class, AfterClass.class)) {
+			resultBuilder.addWarning(method.getName() + ": this test method is also marked @Before(Class) or @After(Class), so it's ignored.");
+			isValid = false;
+		}
 		//annotaciok szempontjabol ez jo, de parameterek es visszateresi ertek szempontjabol nem biztos
-		if(method.getParameterCount() > 0) return false;
-		if(!method.getReturnType().equals(Boolean.TYPE)) return false;
-		return true;
+		if(method.getParameterCount() > 0) {
+			resultBuilder.addWarning(method.getName() + ": this test method has parameters, which is not allowed, so it's ignored.");
+			isValid = false;
+		}
+		if(!method.getReturnType().equals(Boolean.TYPE)) {
+			resultBuilder.addWarning(method.getName() + ": this test method has non-boolean return value, so it's ignored.");
+			isValid = false;
+		}
+		return isValid;
 	}
 	
 	/**

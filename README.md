@@ -28,13 +28,15 @@ MÉG NINCSENEK IMPLEMENTÁLVA.
 ~~Ezek az annotációk a feladat leírása szerint működnek.~~
 
 ## Tesztek eredménye:
-Az eredmény egy TestResult objektumban jön vissza, ami toString-el formázottan jeleníthető meg, 
+Az eredmény egy *TestResult* objektumban jön vissza, ami *toString*-el formázottan jeleníthető meg, 
 vagy el lehet kérni külön külön a dolgokat, pl az egyes metódusok eredményeit.
 
 ## Hibás teszt osztályok, teszt metódusok.
-Ha a teszt osztály hibás (nincs @TestCase, nincs default konstruktor, stb...) akkor TestException 
-dobódik. Ha egy metódus nem megfelelő teszt metódus (pl van paramétere vagy nem bool a visszatérési 
-értéke) akkor az ignorálva lesz.
+Ha a teszt osztály hibás (nincs @TestCase, nincs default konstruktor, stb...) akkor *TestException* 
+dobódik. Ha egy metódus nem megfelelő teszt metódusokhoz (pl van paramétere vagy nem bool a visszatérési 
+értéke) egy warning fog készülni és a metódus ignorálva lesz.
+
+A warningok a *TestResult* objektumból kérhetőek le vagy írathatóak ki.
 
 ## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az *src/test/java* mappában találhatóak.

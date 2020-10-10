@@ -24,6 +24,8 @@ public class JUnit_ArithmeticTest {
 	@BeforeClass
 	public static void performTest() {
 		testResult = TestRunner.testClass(ArithmeticTest.class);
+		//ezeket futtatva lehet latni a formazott eredmenyt
+		System.out.println(testResult.toString());
 	}
 	
 	@Test
