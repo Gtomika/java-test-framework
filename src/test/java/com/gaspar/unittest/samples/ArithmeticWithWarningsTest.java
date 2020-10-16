@@ -11,11 +11,15 @@ import com.gaspar.unittest.annotations.TestCase;
 @TestCase
 public class ArithmeticWithWarningsTest {
 
-	//before és paraméter miatt 2 warning
+	/*
+	 * Ezt megprobalja teszt es @Before metoduskent is ertelmezni.
+	 * Tesztkent: before, paraméter és private miatt 3 warning.
+	 * Before-kent: test, parameter, return value és private miatt 4 warning.
+	 */
 	@SuppressWarnings("unused")
 	@Test
 	@Before
-	public boolean testAdd(int dummyParam) {
+	private boolean testAdd(int dummyParam) {
 		return add(2,2) == 4;
 	}
 	
@@ -29,11 +33,11 @@ public class ArithmeticWithWarningsTest {
 		return new Object();
 	}
 	
-	//dupla assert, 1 warning
+	//dupla assert és static miatt 2 warning
 	@Test
 	@AssertFalse
 	@AssertThrows(exception = ArithmeticException.class)
-	public boolean divideByZero() {
+	public static boolean divideByZero() {
 		divide(5,0);
 		return false;
 	}
@@ -42,7 +46,7 @@ public class ArithmeticWithWarningsTest {
 		return n1 + n2;
 	}
 	
-	public int divide(int n1, int n2) {
+	public static int divide(int n1, int n2) {
 		return n1 / n2;
 	}
 }

@@ -20,13 +20,13 @@ public class JUnit_ArithmeticWithWarningsTest {
 	public static void performTest() {
 		testResult = TestRunner.testClass(ArithmeticWithWarningsTest.class);
 		//ezeket futtatva lehet latni a formazott eredmenyt
-		//System.out.println(testResult.toString());
-		//testResult.printWarnings();
+		System.out.println(testResult.toString());
+		testResult.printWarnings();
 	}
 	
 	@Test
 	public void testWarningsNumber() {
-		assertTrue(testResult.getWarnings().size() == 5);
+		assertTrue(testResult.getWarnings().size() == 11);
 	}
 	
 	@Test

@@ -2,6 +2,7 @@ package com.gaspar.unittest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,13 +28,13 @@ class MethodCollector {
 	/** A futtatando teszt metodusok. */
 	private final List<TestMethod> testMethods = new ArrayList<>();
 	/** A minden teszt elott futtatando metodusok. */
-	private final List<Method> beforeEachMethods = new ArrayList<>();
+	private final List<Method> beforeMethods = new ArrayList<>();
 	/** Az osztaly tesztelese elott egyszer futtatando metodusok. */
-	private final List<Method> beforeAllMethods = new ArrayList<>();
+	private final List<Method> beforeClassMethods = new ArrayList<>();
 	/** A minden teszt utan futtatando metodusok. */
-	private final List<Method> afterEachMethods = new ArrayList<>();
+	private final List<Method> afterMethods = new ArrayList<>();
 	/** Az osztaly tesztelese utan egyszer futtatando metodusok. */
-	private final List<Method> afterAllMethods = new ArrayList<>();
+	private final List<Method> afterClassMethods = new ArrayList<>();
 	
 	/** A listazas soran talalt problemakat gyujti ossze. */
 	private final TestResult.Builder resultBuilder;
@@ -47,7 +48,7 @@ class MethodCollector {
 	/** Feltolti a metodus listakat. */
 	private void listMethods() {
 		for(Method method: methods) {
-			if(method.isAnnotationPresent(Skip.class)) { //skip-es ignoralasa
+			if(method.isAnnotationPresent(Skip.class) || method.getAnnotations().length == 0) { //skip-es és annotacio nelkuli ignoralasa
 				continue;
 			} else if(validTestMethod(method)) { //ervenyes teszmetodus
 				//elvart ertek beolvasasa
@@ -66,18 +67,27 @@ class MethodCollector {
 					testMethods.add(new TestMethod(method, true));
 				}
 				
-			} //TODO: before, after, ... metodusok osszegyujtese
+			} else if(validBeforeMethod(method)) {
+				beforeMethods.add(method);
+			} else if(validBeforeClassMethod(method)) {
+				beforeClassMethods.add(method);
+			} else if(validAfterMethod(method)) {
+				afterMethods.add(method);
+			} else if(validAfterClassMethod(method)) {
+				afterClassMethods.add(method);
+			} 
 		}
 	}
 	
 	/**
 	 *  Megnezi, hogy a kapott metodus érvényes tesztmetodus-e.
-	 *  Érvényes, ha:
+	 *  A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Ervenyes, ha:
 	 *  	- van rajta Test annotáció
 	 *  	- nincs rajta elvárt visszatérési érték jelző (ekkor true lesz), vagy pontosan egy van rajta (AssertTrue, AssertFalse, AssertThrow).
 	 *  	- nincs rajta egyéb annotáció, pl Before, Skip.
 	 *  	- nincs parametere
 	 *  	- boolean a visszateresi erteke (meg akkor is, ha kivetelt varunk el tole)
+	 *  	- nem statikus, és public
 	 */
 	private boolean validTestMethod(final Method method) {
 		boolean isValid = true;
@@ -104,7 +114,121 @@ class MethodCollector {
 			resultBuilder.addWarning(method.getName() + ": this test method has non-boolean return value, so it's ignored.");
 			isValid = false;
 		}
+		if(Modifier.isStatic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this test method is static, which is not allowed.");
+			isValid = false;
+		}
+		if(!Modifier.isPublic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this test method is not public, which is not allowed.");
+			isValid = false;
+		}
 		return isValid;
+	}
+	
+	/**
+	 * Megnezi, hogy az adott metodus valid Before, minden teszt elott futtatando metodus.
+	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
+	 * 	- Nincs rajta Skip, Test, After, BeforeClass, AfterClass
+	 * 	- Van rajta Before
+	 *  - Nincs paramétere, se visszatérési értéke
+	 *  - Nem statikus és public
+	 */
+	private boolean validBeforeMethod(final Method method) {
+		boolean isValid = true;
+		if(!method.isAnnotationPresent(Before.class)) {
+			//nem @Before, de ez nem warning
+			return false; //visszateres, hogy a tobbi warning ne adodjon hozza ehhez a metodushoz
+		}
+		if(hasAnyAnnotation(method, BeforeClass.class, AfterClass.class, After.class, Test.class)) {
+			resultBuilder.addWarning(method.getName() + ": this @Before method has non-compatible annotations with @Before, so it's ignored.");
+		}
+		//annotaciok szempontjabol ez jo, de parameterek es visszateresi ertek szempontjabol nem biztos
+		if(method.getParameterCount() > 0) {
+			resultBuilder.addWarning(method.getName() + ": this @Before method has parameters, which is not allowed, so it's ignored.");
+			isValid = false;
+		}
+		if(!method.getReturnType().equals(Void.TYPE)) {
+			resultBuilder.addWarning(method.getName() + ": this @Before method has a return value, so it's ignored.");
+			isValid = false;
+		}
+		if(Modifier.isStatic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @Before method is static, which is not allowed.");
+			isValid = false;
+		}
+		if(!Modifier.isPublic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @Before method is not public, which is not allowed.");
+			isValid = false;
+		}
+		return isValid;
+	}
+	
+	/**
+	 * Megnezi, hogy az adott metodus valid BeforeClass, tesztek elott egyszer futtatando metodus.
+	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
+	 * 	- Nincs rajta Skip, Test, After, Before, AfterClass
+	 * 	- Van rajta BeforeClass
+	 *  - Nincs paramétere, se visszatérési értéke
+	 *  - Statikus és public
+	 */
+	private boolean validBeforeClassMethod(final Method method) {
+		boolean isValid = true;
+		if(!method.isAnnotationPresent(BeforeClass.class)) {
+			//nem @BeforeClass, de ez nem warning
+			return false; //visszateres, hogy a tobbi warning ne adodjon hozza ehhez a metodushoz
+		}
+		if(hasAnyAnnotation(method, Before.class, AfterClass.class, After.class, Test.class)) {
+			resultBuilder.addWarning(method.getName() + ": this @BeforeClass method has non-compatible annotations with @BeforeClass, so it's ignored.");
+		}
+		//annotaciok szempontjabol ez jo, de parameterek es visszateresi ertek szempontjabol nem biztos
+		if(method.getParameterCount() > 0) {
+			resultBuilder.addWarning(method.getName() + ": this @BeforeClass method has parameters, which is not allowed, so it's ignored.");
+			isValid = false;
+		}
+		if(!method.getReturnType().equals(Void.TYPE)) {
+			resultBuilder.addWarning(method.getName() + ": this @BeforeClass method has a return value, so it's ignored.");
+			isValid = false;
+		}
+		if(!Modifier.isStatic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @BeforeClass method is NOT static, which is not allowed.");
+			isValid = false;
+		}
+		if(!Modifier.isPublic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @BeforeClass method is not public, which is not allowed.");
+			isValid = false;
+		}
+		return isValid;
+	}
+	
+	/**
+	 * Megnezi, hogy az adott metodus valid After, minden teszt utan futtatando metodus.
+	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
+	 * 	- Nincs rajta Skip, Test, Before, BeforeClass, AfterClass
+	 * 	- Van rajta After
+	 *  - Nincs paramétere, se visszatérési értéke
+	 *  - Nem statikus és public
+	 */
+	//TODO
+	private boolean validAfterMethod(final Method method) {
+		//boolean isValid = true;
+		
+		//return isValid;
+		return false;
+	}
+	
+	/**
+	 * Megnezi, hogy az adott metodus valid AfterClass, tesztek utan egyszer futtatando metodus.
+	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
+	 * 	- Nincs rajta Skip, Test, After, Before, BeforeClass
+	 * 	- Van rajta AfterClass
+	 *  - Nincs paramétere, se visszatérési értéke
+	 *  - Statikus és public
+	 */
+	//TODO
+	private boolean validAfterClassMethod(final Method method) {
+		//boolean isValid = true;
+		
+		//return isValid;
+		return false;
 	}
 	
 	/**
@@ -133,19 +257,19 @@ class MethodCollector {
 		return testMethods;
 	}
 
-	public List<Method> getBeforeEachMethods() {
-		return beforeEachMethods;
+	public List<Method> getBeforeMethods() {
+		return beforeMethods;
 	}
 
-	public List<Method> getBeforeAllMethods() {
-		return beforeAllMethods;
+	public List<Method> getBeforeClassMethods() {
+		return beforeClassMethods;
 	}
 
-	public List<Method> getAfterEachMethods() {
-		return afterEachMethods;
+	public List<Method> getAfterMethods() {
+		return afterMethods;
 	}
 
-	public List<Method> getAfterAllMethods() {
-		return afterAllMethods;
-	}	
+	public List<Method> getAfterClassMethods() {
+		return afterClassMethods;
+	}
 }

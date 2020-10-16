@@ -1,0 +1,48 @@
+package com.gaspar.unittest.tests;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.gaspar.unittest.TestRunner;
+import com.gaspar.unittest.results.TestResult;
+import com.gaspar.unittest.samples.StringTest;
+
+/**
+ * JUnit-tal teszteli a sajat framework eredmenyet a StringTest osztalyon.
+ * @author Gaspar Tamas
+ */
+public class JUnit_StringTest {
+
+	/** A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
+	private static TestResult testResult;
+	
+	/** Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
+	@BeforeClass
+	public static void performTest() {
+		testResult = TestRunner.testClass(StringTest.class);
+		//ezeket futtatva lehet latni a formazott eredmenyt
+		//System.out.println(testResult.toString());
+	}
+	
+	@Test
+	public void testCounter() {
+		assertEquals(StringTest.getTestCounter(), 2);
+	}
+	
+	@Test
+	public void testResult1() {
+		assertEquals(testResult.getSuccessfulTestCount(), testResult.getTestCount());
+	}
+	
+	@Test
+	public void testResult2() {
+		assertEquals(2, testResult.getTestCount());
+	}
+	
+	@Test
+	public void testWarnings() {
+		assertEquals(testResult.getWarnings().size(), 0);
+	}
+}

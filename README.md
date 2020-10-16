@@ -23,20 +23,27 @@ Tesztmetódusnak nem lehet paramétere.
 A teszt sikeres lesz, ha az elvárt boolean értéket adja vissza, vagy elvárt kivétel esetén ténylegesen 
 dobja a kivételt.
 
-## Before, After működése
-MÉG NINCSENEK IMPLEMENTÁLVA.
-~~Ezek az annotációk a feladat leírása szerint működnek.~~
-
 ## Tesztek eredménye:
 Az eredmény egy *TestResult* objektumban jön vissza, ami *toString*-el formázottan jeleníthető meg, 
 vagy el lehet kérni külön külön a dolgokat, pl az egyes metódusok eredményeit.
 
 ## Hibás teszt osztályok, teszt metódusok.
 Ha a teszt osztály hibás (nincs @TestCase, nincs default konstruktor, stb...) akkor *TestException* 
-dobódik. Ha egy metódus nem megfelelő teszt metódusokhoz (pl van paramétere vagy nem bool a visszatérési 
+dobódik. Ha egy metódus nem megfelelő teszt metódus (pl van paramétere, *static*, vagy nem bool a visszatérési 
 értéke) egy warning fog készülni és a metódus ignorálva lesz.
 
 A warningok a *TestResult* objektumból kérhetőek le vagy írathatóak ki.
+
+## Before(Class), After(Class) működése
+Ezek a feladatkiírás szerint működnek. Mindegyiknek *public*-nak kell lenne, az *@AfterClass* és 
+*@BeforeClass* metódusoknak *static*-nak is kell lenniük. Se paraméterük, se visszatérési értékük 
+nem lehet. Ha ezek nem teljesülnek, akkor a hibás szintaxisú tesztekhez hasonlóan ezekhez is warningok 
+készülnek és a metódusok ignorálva lesznek.
+
+Ha egy ilyen metódus híváskor kivételt dob, akkor a tesztelés *TestException*-nel megszakad, az okot 
+a kivétel üzenetében lehet látni.
+
+AFTER és AFTERCLASS MÉG NINCSENEK IMPLEMENTÁLVA.
 
 ## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az *src/test/java* mappában találhatóak.

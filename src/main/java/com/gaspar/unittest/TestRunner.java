@@ -1,6 +1,7 @@
 package com.gaspar.unittest;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -59,7 +60,8 @@ public class TestRunner {
 	/**
 	 * Lefuttatja az osszes adott osztaly teszt metodusat, minden osztalyt sajat szalon.
 	 * @param classes Az adott osztalyok.
-	 * @throws TestException Ha barmelyik adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora.
+	 * @throws TestException Ha barmelyik adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora, vagy ha barmelyik 
+	 * 			osztaly kivetelt dob teszteles kozben.
 	 */
 	public static List<TestResult> testClasses(Class<?>...classes) throws TestException {
 		int threadNum = Math.min(classes.length, Runtime.getRuntime().availableProcessors());
@@ -81,7 +83,7 @@ public class TestRunner {
 			}
 			return results;
 		} catch (InterruptedException | ExecutionException e) {
-			throw new TestException(e.getClass().getSimpleName() + " while running tests on multiple threads: " + e.getMessage());
+			throw new TestException(e.getMessage()); //az egyik osztaly kivetelt dobott
 		} 
 		
 	}
@@ -93,11 +95,20 @@ public class TestRunner {
 	private TestResult doClassTest() throws IllegalAccessException, InstantiationException, TestException {
 		resultBuilder.withClassName(clazz.getName());
 		final Object testInstance = clazz.newInstance(); //default konstruktorral peldanyositas
+		//BeforeClass metodusok hivasa
+		callBeforeClassMethods();
 		//tesztmetodusok iteralasa
 		for(TestMethod testMethod: methodCollector.getTestMethods()) {
+			//before metodusok hivasa
+			callBeforeMethods(testInstance);
+			//tesztmetodus hivasa
 			MethodTestResult methodResult = doMethodTest(testMethod, testInstance);
 			resultBuilder.addResult(methodResult); //eredmeny elmentese 
+			//after metodusok hivasa
+			callAfterMethods(testInstance);
 		}
+		//AfterClass metodusok hivasa
+		callAfterClassMethods();
 		return resultBuilder.build();
 	}
 	
@@ -133,5 +144,55 @@ public class TestRunner {
 			}
 		}
 		return testResult;
+	}
+	
+	/**
+	 * Meghivja a tesztek elott egyszer futtatando metodusokat.
+	 * @throws TestException Ha ezek kivetelt dobnak.
+	 */
+	private void callBeforeClassMethods() throws TestException {
+		for(Method method: methodCollector.getBeforeClassMethods()) {
+			try {
+				method.invoke(null); //ez biztosan static, es nincs parametere
+			} catch(InvocationTargetException e) {
+				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @BeforeClass method " + method.getName() + ".");
+			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
+				throw new TestException("Could not call @BeforeClass method " + method.getName()); 
+			}
+		}
+	}
+	
+	/**
+	 * Meghivja a tesztek utan egyszer futtatando metodusokat.
+	 * @throws TestException Ha ezek kivetelt dobnak.
+	 */
+	private void callAfterClassMethods() {
+		//TODO
+	}
+	
+	/**
+	 * Meghivja a minden teszt elott futtatando metodusokat.
+	 * @param instance A teszt osztaly objektuma.
+	 * @throws TestException Ha ezek kivetelt dobnak.
+	 */
+	private void callBeforeMethods(final Object instance) throws TestException {
+		for(Method method: methodCollector.getBeforeMethods()) {
+			try {
+				method.invoke(instance); //ez biztosan nem static, es nincs parametere
+			} catch(InvocationTargetException e) {
+				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @Before method " + method.getName() + ".");
+			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
+				throw new TestException("Could not call @BeforeClass method " + method.getName()); 
+			}
+		}
+	}
+	
+	/**
+	 * Meghivja a minden teszt utan futtatando metodusokat.
+	 * @param instance A teszt osztaly objektuma.
+	 * @throws TestException Ha ezek kivetelt dobnak.
+	 */
+	private void callAfterMethods(final Object instance) throws TestException {
+		//TODO
 	}
 }
