@@ -28,7 +28,7 @@ public class JUnit_StringTest {
 	
 	@Test
 	public void testCounter() {
-		assertEquals(StringTest.getTestCounter(), 2);
+		assertEquals(2, StringTest.getTestCounter());
 	}
 	
 	@Test

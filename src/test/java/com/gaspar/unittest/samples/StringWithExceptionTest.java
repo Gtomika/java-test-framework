@@ -17,6 +17,7 @@ public class StringWithExceptionTest {
 	
 	@BeforeClass
 	public static void initTestStrings() {
+		testCounter = 0;
 		//testString2 null!!!!
 		testString1 = testString2.concat("valami");
 	}

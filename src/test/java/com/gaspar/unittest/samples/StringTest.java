@@ -18,6 +18,7 @@ public class StringTest {
 	
 	@BeforeClass
 	public static void initTestStrings() {
+		testCounter = 0;
 		testString1 = "Hello world!";
 		testString2 = "My test framework";
 	}
