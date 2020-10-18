@@ -1,11 +1,13 @@
 package com.gaspar.unittest.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.gaspar.unittest.TestRunner;
+import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.StringTest;
 
@@ -33,7 +35,7 @@ public class JUnit_StringTest {
 	
 	@Test
 	public void testResult1() {
-		assertEquals(testResult.getSuccessfulTestCount(), testResult.getTestCount());
+		assertTrue(testResult.getStatus() == ResultStatus.SUCCESS);
 	}
 	
 	@Test

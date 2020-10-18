@@ -1,21 +1,22 @@
 package com.gaspar.unittest.tests;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
-import com.gaspar.unittest.TestException;
 import com.gaspar.unittest.TestRunner;
+import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.samples.StringWithExceptionTest;
 
 /**
  * JUnit-tal teszteli a {@link StringWithExceptionTest} osztaly teszteredmenyet.
- * @author Gaspar Tamas
  */
 public class JUnit_StringWithExceptionTest {
 
-	//azt varjuk, hogy a teszteles nem fog vegezni (TestException), mert az @BeforeClass NPE-t dob
-	@Test(expected = TestException.class)
+	//azt varjuk, hogy a teszteles INTERRUPTED lesz, mert az @BeforeClass kivetelt dob
+	@Test
 	public void attemptTest() {
-		TestRunner.testClass(StringWithExceptionTest.class);
+		assertTrue(TestRunner.testClass(StringWithExceptionTest.class).getStatus() == ResultStatus.INTERRUPTED);
 	}
 	
 }

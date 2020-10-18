@@ -15,4 +15,12 @@ import com.gaspar.unittest.TestException;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface TestCase {}
+public @interface TestCase {
+	
+	/** Konstans annak jelzesere, hogy nincs idokorlat. Ezt nem kell megadni, ez az alapertelmezett. */
+	public static final long NO_TIME_LIMIT = -1;
+	
+	/** Idokorlat az osztaly tesztelesere (ezredmasodperc). */
+	public long timeLimit() default NO_TIME_LIMIT;
+	
+}

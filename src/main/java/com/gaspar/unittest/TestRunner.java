@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.gaspar.unittest.annotations.TestCase;
+import com.gaspar.unittest.results.InterruptCause;
 import com.gaspar.unittest.results.MethodTestResult;
 import com.gaspar.unittest.results.TestResult;
 
@@ -34,6 +35,9 @@ public class TestRunner {
 		this.clazz = clazz;
 		if(!clazz.isAnnotationPresent(TestCase.class)) { //annotacio ellenorzes
 			throw new TestException("Missing @TestCase on class " + clazz.getSimpleName());
+		} else { //annotacio ott van, adattagok elkerese
+			TestCase testCase = clazz.getAnnotation(TestCase.class);
+			resultBuilder.withTimeLimit(testCase.timeLimit()); //time limit elmentese
 		}
 		try {
 			clazz.getConstructor(); //deafult konstruktor elkerese
@@ -60,8 +64,7 @@ public class TestRunner {
 	/**
 	 * Lefuttatja az osszes adott osztaly teszt metodusat, minden osztalyt sajat szalon.
 	 * @param classes Az adott osztalyok.
-	 * @throws TestException Ha barmelyik adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora, vagy ha barmelyik 
-	 * 			osztaly kivetelt dob teszteles kozben.
+	 * @throws TestException Ha barmelyik adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora.
 	 */
 	public static List<TestResult> testClasses(Class<?>...classes) throws TestException {
 		int threadNum = Math.min(classes.length, Runtime.getRuntime().availableProcessors());
@@ -94,21 +97,31 @@ public class TestRunner {
 	 */
 	private TestResult doClassTest() throws IllegalAccessException, InstantiationException, TestException {
 		resultBuilder.withClassName(clazz.getName());
+		//idomeres kezdete
+		final long startTime = System.currentTimeMillis();
 		final Object testInstance = clazz.newInstance(); //default konstruktorral peldanyositas
-		//BeforeClass metodusok hivasa
-		callBeforeClassMethods();
-		//tesztmetodusok iteralasa
-		for(TestMethod testMethod: methodCollector.getTestMethods()) {
-			//before metodusok hivasa
-			callBeforeMethods(testInstance);
-			//tesztmetodus hivasa
-			MethodTestResult methodResult = doMethodTest(testMethod, testInstance);
-			resultBuilder.addResult(methodResult); //eredmeny elmentese 
-			//after metodusok hivasa
-			callAfterMethods(testInstance);
+		try {
+			//BeforeClass metodusok hivasa
+			callBeforeClassMethods();
+			//tesztmetodusok iteralasa
+			for(TestMethod testMethod: methodCollector.getTestMethods()) {
+				//before metodusok hivasa
+				callBeforeMethods(testInstance);
+				//tesztmetodus hivasa
+				MethodTestResult methodResult = doMethodTest(testMethod, testInstance);
+				resultBuilder.addResult(methodResult); //eredmeny elmentese 
+				//after metodusok hivasa
+				callAfterMethods(testInstance);
+			}
+			//AfterClass metodusok hivasa
+			callAfterClassMethods();
+		} catch(TestInterruptException e) { //megszakadt a teszteles!
+			resultBuilder.withInterrupt(e.getInterruptCause());
+		} finally {
+			//idomeres vege
+			final long endTime = System.currentTimeMillis();
+			resultBuilder.withTestTime(endTime - startTime);
 		}
-		//AfterClass metodusok hivasa
-		callAfterClassMethods();
 		return resultBuilder.build();
 	}
 	
@@ -148,32 +161,36 @@ public class TestRunner {
 	
 	/**
 	 * Meghivja a tesztek elott egyszer futtatando metodusokat.
-	 * @throws TestException Ha ezek kivetelt dobnak.
+	 * @throws TestInterruptException Ha ezek kivetelt dobnak.
 	 */
-	private void callBeforeClassMethods() throws TestException {
+	private void callBeforeClassMethods() throws TestInterruptException {
 		for(Method method: methodCollector.getBeforeClassMethods()) {
 			try {
 				method.invoke(null); //ez biztosan static, es nincs parametere
 			} catch(InvocationTargetException e) {
-				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @BeforeClass method " + method.getName() + ".");
+				InterruptCause cause = new InterruptCause(e.getCause(), method.getName(), "@BeforeClass");
+				throw new TestInterruptException(cause);
 			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
-				throw new TestException("Could not call @BeforeClass method " + method.getName()); 
+				InterruptCause cause = new InterruptCause(e, method.getName(), "@BeforeClass");
+				throw new TestInterruptException(cause);
 			}
 		}
 	}
 	
 	/**
 	 * Meghivja a tesztek utan egyszer futtatando metodusokat.
-	 * @throws TestException Ha ezek kivetelt dobnak.
+	 * @throws TestInterruptException Ha ezek kivetelt dobnak.
 	 */
-	private void callAfterClassMethods() {
+	private void callAfterClassMethods() throws TestInterruptException {
 		for(Method method: methodCollector.getAfterClassMethods()) {
 			try {
 				method.invoke(null); //ez biztosan static, es nincs parametere
 			} catch(InvocationTargetException e) {
-				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @AfterClass method " + method.getName() + ".");
+				InterruptCause cause = new InterruptCause(e.getCause(), method.getName(), "@AfterClass");
+				throw new TestInterruptException(cause);
 			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
-				throw new TestException("Could not call @AfterClass method " + method.getName()); 
+				InterruptCause cause = new InterruptCause(e, method.getName(), "@AfterClass");
+				throw new TestInterruptException(cause);
 			}
 		}
 	}
@@ -181,16 +198,18 @@ public class TestRunner {
 	/**
 	 * Meghivja a minden teszt elott futtatando metodusokat.
 	 * @param instance A teszt osztaly objektuma.
-	 * @throws TestException Ha ezek kivetelt dobnak.
+	 * @throws TestInterruptException Ha ezek kivetelt dobnak.
 	 */
-	private void callBeforeMethods(final Object instance) throws TestException {
+	private void callBeforeMethods(final Object instance) throws TestInterruptException {
 		for(Method method: methodCollector.getBeforeMethods()) {
 			try {
 				method.invoke(instance); //ez biztosan nem static, es nincs parametere
 			} catch(InvocationTargetException e) {
-				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @Before method " + method.getName() + ".");
+				InterruptCause cause = new InterruptCause(e.getCause(), method.getName(), "@Before");
+				throw new TestInterruptException(cause);
 			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
-				throw new TestException("Could not call @Before method " + method.getName()); 
+				InterruptCause cause = new InterruptCause(e, method.getName(), "@Before");
+				throw new TestInterruptException(cause);
 			}
 		}
 	}
@@ -198,16 +217,18 @@ public class TestRunner {
 	/**
 	 * Meghivja a minden teszt utan futtatando metodusokat.
 	 * @param instance A teszt osztaly objektuma.
-	 * @throws TestException Ha ezek kivetelt dobnak.
+	 * @throws TestInterruptException Ha ezek kivetelt dobnak.
 	 */
-	private void callAfterMethods(final Object instance) throws TestException {
+	private void callAfterMethods(final Object instance) throws TestInterruptException {
 		for(Method method: methodCollector.getAfterMethods()) {
 			try {
 				method.invoke(instance); //ez biztosan nem static, es nincs parametere
 			} catch(InvocationTargetException e) {
-				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @After method " + method.getName() + ".");
+				InterruptCause cause = new InterruptCause(e.getCause(), method.getName(), "@After");
+				throw new TestInterruptException(cause);
 			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
-				throw new TestException("Could not call @After method " + method.getName()); 
+				InterruptCause cause = new InterruptCause(e, method.getName(), "@After");
+				throw new TestInterruptException(cause);
 			}
 		}
 	}

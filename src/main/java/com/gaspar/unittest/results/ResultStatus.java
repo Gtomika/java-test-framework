@@ -1,6 +1,6 @@
 package com.gaspar.unittest.results;
 
-/** Egy teszmetodus futtatasanak lehetseges 3 eredmenye. */
+/** Egy tesztosztaly vagy teszmetodus futtatasanak lehetseges 3 eredmenye. */
 public enum ResultStatus {
 	SUCCESS, FAIL, INTERRUPTED;
 	
@@ -8,13 +8,13 @@ public enum ResultStatus {
 		String s = null;
 		switch (status) {
 		case SUCCESS:
-			s = "success";
+			s = "SUCCESS";
 			break;
 		case FAIL:
-			s = "fail";
+			s = "FAIL";
 			break;
 		case INTERRUPTED:
-			s = "unexpected exception";
+			s = "INTERRUPTED";
 			break;
 		}
 		return s;

@@ -40,8 +40,7 @@ Ezek a feladatkiírás szerint működnek. Mindegyiknek *public*-nak kell lenne,
 nem lehet. Ha ezek nem teljesülnek, akkor a hibás szintaxisú tesztekhez hasonlóan ezekhez is warningok 
 készülnek és a metódusok ignorálva lesznek.
 
-Ha egy ilyen metódus híváskor kivételt dob, akkor a tesztelés *TestException*-nel megszakad, az okot 
-a kivétel üzenetében lehet látni.
+Ha egy ilyen metódus híváskor kivételt dob, akkor a tesztelés megszakad, INTERRUPTED eredménnyel.
 
 ## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az *src/test/java* mappában találhatóak.

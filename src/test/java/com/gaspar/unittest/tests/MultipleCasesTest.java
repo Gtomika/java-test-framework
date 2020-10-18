@@ -1,6 +1,5 @@
 package com.gaspar.unittest.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -9,7 +8,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.gaspar.unittest.TestRunner;
-import com.gaspar.unittest.results.*;
+import com.gaspar.unittest.results.ResultStatus;
+import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.ArithmeticTest;
 import com.gaspar.unittest.samples.ArithmeticWithWarningsTest;
 import com.gaspar.unittest.samples.StringTest;
@@ -28,12 +28,12 @@ public class MultipleCasesTest {
 	public static void doTests() {
 		results = TestRunner.testClasses(ArithmeticTest.class, ArithmeticWithWarningsTest.class, StringTest.class);
 		//ezt futtatva lehet latni formazott eredmenyeket
-		//results.forEach(System.out::println);
+		results.forEach(System.out::println);
 	}
 	
 	@Test
-	public void testArithmeticSuccessCount() {
-		assertEquals(results.get(0).getSuccessfulTestCount(), 3);
+	public void testAllSuccess() {
+		assertTrue(results.stream().allMatch(res -> res.getStatus() == ResultStatus.SUCCESS));
 	}
 	
 	@Test
@@ -44,10 +44,5 @@ public class MultipleCasesTest {
 	@Test
 	public void testArithmeticWarningValidMethodCount() {
 		assertTrue(results.get(1).getTestCount() == 0);
-	}
-	
-	@Test
-	public void testStringResultSuccessResult() {
-		assertEquals(2, results.get(2).getTestCount());
 	}
 }
