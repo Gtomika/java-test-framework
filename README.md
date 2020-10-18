@@ -43,7 +43,5 @@ készülnek és a metódusok ignorálva lesznek.
 Ha egy ilyen metódus híváskor kivételt dob, akkor a tesztelés *TestException*-nel megszakad, az okot 
 a kivétel üzenetében lehet látni.
 
-AFTER és AFTERCLASS MÉG NINCSENEK IMPLEMENTÁLVA.
-
 ## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az *src/test/java* mappában találhatóak.

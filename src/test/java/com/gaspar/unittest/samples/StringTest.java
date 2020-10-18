@@ -1,5 +1,6 @@
 package com.gaspar.unittest.samples;
 
+import com.gaspar.unittest.annotations.After;
 import com.gaspar.unittest.annotations.Before;
 import com.gaspar.unittest.annotations.BeforeClass;
 import com.gaspar.unittest.annotations.Test;
@@ -7,7 +8,7 @@ import com.gaspar.unittest.annotations.TestCase;
 
 /**
  * Tartalmaz 2 string-et vizsgalo metodust es ezekez teszteli sajat framework-el.
- * Ez elsosorban a framework Before es BeforeClass reszeit hasznalja.
+ * Ez elsosorban a framework Before, After, BeforeClass es AfterClass reszeit hasznalja, teszteli.
  * @author Gaspar Tamas
  */
 @TestCase
@@ -23,9 +24,16 @@ public class StringTest {
 		testString2 = "My test framework";
 	}
 	
+	//before 2-vel noveli, after 1-el csokkenti a szamlalot. Igy az elvart eredmeny 
+	//a szamlalora annyi ahany tesztet vegzunk es latszik hogy mindketto annotacio mukodik
 	@Before
-	public void countTest() {
-		testCounter++;
+	public void increaseCounter() {
+		testCounter += 2;
+	}
+	
+	@After
+	public void decreaseCounter() {
+		testCounter--;
 	}
 	
 	@Test

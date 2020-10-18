@@ -167,7 +167,15 @@ public class TestRunner {
 	 * @throws TestException Ha ezek kivetelt dobnak.
 	 */
 	private void callAfterClassMethods() {
-		//TODO
+		for(Method method: methodCollector.getAfterClassMethods()) {
+			try {
+				method.invoke(null); //ez biztosan static, es nincs parametere
+			} catch(InvocationTargetException e) {
+				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @AfterClass method " + method.getName() + ".");
+			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
+				throw new TestException("Could not call @AfterClass method " + method.getName()); 
+			}
+		}
 	}
 	
 	/**
@@ -182,7 +190,7 @@ public class TestRunner {
 			} catch(InvocationTargetException e) {
 				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @Before method " + method.getName() + ".");
 			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
-				throw new TestException("Could not call @BeforeClass method " + method.getName()); 
+				throw new TestException("Could not call @Before method " + method.getName()); 
 			}
 		}
 	}
@@ -193,6 +201,14 @@ public class TestRunner {
 	 * @throws TestException Ha ezek kivetelt dobnak.
 	 */
 	private void callAfterMethods(final Object instance) throws TestException {
-		//TODO
+		for(Method method: methodCollector.getAfterMethods()) {
+			try {
+				method.invoke(instance); //ez biztosan nem static, es nincs parametere
+			} catch(InvocationTargetException e) {
+				throw new TestException(e.getCause().getClass().getSimpleName() + " exception while calling @After method " + method.getName() + ".");
+			} catch (IllegalAccessException e) { //elvileg ez nem lehet, mert a public ellenorizve lett
+				throw new TestException("Could not call @After method " + method.getName()); 
+			}
+		}
 	}
 }

@@ -207,12 +207,33 @@ class MethodCollector {
 	 *  - Nincs paramétere, se visszatérési értéke
 	 *  - Nem statikus és public
 	 */
-	//TODO
 	private boolean validAfterMethod(final Method method) {
-		//boolean isValid = true;
-		
-		//return isValid;
-		return false;
+		boolean isValid = true;
+		if(!method.isAnnotationPresent(After.class)) {
+			//nem @After, de ez nem warning
+			return false; //visszateres, hogy a tobbi warning ne adodjon hozza ehhez a metodushoz
+		}
+		if(hasAnyAnnotation(method, BeforeClass.class, AfterClass.class, Before.class, Test.class)) {
+			resultBuilder.addWarning(method.getName() + ": this @After method has non-compatible annotations with @Before, so it's ignored.");
+		}
+		//annotaciok szempontjabol ez jo, de parameterek es visszateresi ertek szempontjabol nem biztos
+		if(method.getParameterCount() > 0) {
+			resultBuilder.addWarning(method.getName() + ": this @After method has parameters, which is not allowed, so it's ignored.");
+			isValid = false;
+		}
+		if(!method.getReturnType().equals(Void.TYPE)) {
+			resultBuilder.addWarning(method.getName() + ": this @After method has a return value, so it's ignored.");
+			isValid = false;
+		}
+		if(Modifier.isStatic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @After method is static, which is not allowed.");
+			isValid = false;
+		}
+		if(!Modifier.isPublic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @After method is not public, which is not allowed.");
+			isValid = false;
+		}
+		return isValid;
 	}
 	
 	/**
@@ -223,12 +244,33 @@ class MethodCollector {
 	 *  - Nincs paramétere, se visszatérési értéke
 	 *  - Statikus és public
 	 */
-	//TODO
 	private boolean validAfterClassMethod(final Method method) {
-		//boolean isValid = true;
-		
-		//return isValid;
-		return false;
+		boolean isValid = true;
+		if(!method.isAnnotationPresent(AfterClass.class)) {
+			//nem @BeforeClass, de ez nem warning
+			return false; //visszateres, hogy a tobbi warning ne adodjon hozza ehhez a metodushoz
+		}
+		if(hasAnyAnnotation(method, Before.class, BeforeClass.class, After.class, Test.class)) {
+			resultBuilder.addWarning(method.getName() + ": this @AfterClass method has non-compatible annotations with @BeforeClass, so it's ignored.");
+		}
+		//annotaciok szempontjabol ez jo, de parameterek es visszateresi ertek szempontjabol nem biztos
+		if(method.getParameterCount() > 0) {
+			resultBuilder.addWarning(method.getName() + ": this @AfterClass method has parameters, which is not allowed, so it's ignored.");
+			isValid = false;
+		}
+		if(!method.getReturnType().equals(Void.TYPE)) {
+			resultBuilder.addWarning(method.getName() + ": this @AfterClass method has a return value, so it's ignored.");
+			isValid = false;
+		}
+		if(!Modifier.isStatic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @AfterClass method is NOT static, which is not allowed.");
+			isValid = false;
+		}
+		if(!Modifier.isPublic(method.getModifiers())) {
+			resultBuilder.addWarning(method.getName() + ": this @AfterClass method is not public, which is not allowed.");
+			isValid = false;
+		}
+		return isValid;
 	}
 	
 	/**
