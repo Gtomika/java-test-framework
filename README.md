@@ -153,4 +153,4 @@ Expected result: NullPointerException, actual result: NullPointerException
 ```
 
 ## Dokumentáció
-Javadoc segítségével, [index](http://vir.inf.u-szeged.hu:8181/Gtomika/UnitTest/tree/master/doc/index.html).
+Javadoc segítségével készült, a [doc](http://vir.inf.u-szeged.hu:8181/Gtomika/UnitTest/tree/master/doc) mappában.
