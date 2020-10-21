@@ -19,6 +19,7 @@ public class TestMethod {
 		assertedException = null;
 	}
 	
+	/** Exception elvart ertek konstruktor. */
 	TestMethod(Method method, Class<? extends Exception> assertedException) {
 		this.method = method;
 		this.assertedException = assertedException;

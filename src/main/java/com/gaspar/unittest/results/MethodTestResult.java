@@ -1,7 +1,7 @@
 package com.gaspar.unittest.results;
 
 /** 
- * Egy metodus teszelesenek eredmenye, amit a {@link com.gaspar.unittest.results.TestResult} objektumtol kerheto el.
+ * Egy metodus teszelesenek eredmenye, ami a {@link TestResult} objektumtol kerheto el.
  * Szep megjelenites biztositva van a {@link #toString()} metodussal.
  */
 public class MethodTestResult { 

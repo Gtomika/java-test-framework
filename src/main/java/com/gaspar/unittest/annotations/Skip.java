@@ -6,7 +6,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/** Az ezzel jelolt metodusok atugrasra kerulnek. */
+/** Az ezzel jelolt metodusok atugrasra kerulnek. Lehet mindenre rakni (teszt, before, stb) */
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface Skip {}

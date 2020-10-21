@@ -11,16 +11,12 @@ import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.StringTest;
 
-/**
- * JUnit-tal teszteli a sajat framework eredmenyet a StringTest osztalyon.
- * @author Gaspar Tamas
- */
 public class JUnit_StringTest {
 
-	/** A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
+	/* A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
 	private static TestResult testResult;
 	
-	/** Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
+	/* Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
 	@BeforeClass
 	public static void performTest() {
 		testResult = TestRunner.testClass(StringTest.class);

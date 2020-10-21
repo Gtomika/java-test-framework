@@ -12,15 +12,12 @@ import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.ArithmeticTest;
 
-/**
- * JUnit-tal teszteli, hogy a sajat teszt framework jol teszteli-e az ArithmeticTest osztalyt.
- */
 public class JUnit_ArithmeticTest {
 
-	/** A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
+	/* A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
 	private static TestResult testResult;
 	
-	/** Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
+	/* Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
 	@BeforeClass
 	public static void performTest() {
 		testResult = TestRunner.testClass(ArithmeticTest.class);

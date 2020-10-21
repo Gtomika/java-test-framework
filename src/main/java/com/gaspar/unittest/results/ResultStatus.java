@@ -1,6 +1,10 @@
 package com.gaspar.unittest.results;
 
-/** Egy tesztosztaly vagy teszmetodus futtatasanak lehetseges 3 eredmenye. */
+/** 
+ * Egy tesztosztaly vagy teszmetodus futtatasanak lehetseges 3 eredmenye.
+ * @see TestResult
+ * @see MethodTestResult
+ */
 public enum ResultStatus {
 	SUCCESS, FAIL, INTERRUPTED;
 	

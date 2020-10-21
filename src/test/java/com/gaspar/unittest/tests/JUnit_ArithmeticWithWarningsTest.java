@@ -9,13 +9,12 @@ import com.gaspar.unittest.TestRunner;
 import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.ArithmeticWithWarningsTest;
 
-/** JUnit-tal teszteli az ArithmeticWithWarningsTest osztály tesztelését */
 public class JUnit_ArithmeticWithWarningsTest {
 	
-	/** A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
+	/* A SAJAT teszt framework teszt eredmenye az eredeti osztalyon. */
 	private static TestResult testResult;
 	
-	/** Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
+	/* Elvegzi a tesztet a SAJAT framework-kel az eredeti osztalyon. */
 	@BeforeClass
 	public static void performTest() {
 		testResult = TestRunner.testClass(ArithmeticWithWarningsTest.class);

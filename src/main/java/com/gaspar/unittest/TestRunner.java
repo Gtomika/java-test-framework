@@ -18,7 +18,7 @@ import com.gaspar.unittest.results.TestResult;
 
 /**
  * Tesztek futtatasat vegzo osztaly. A teszteles a statikus {@link #testClass(Class)} es {@link #testClasses(Class...)} 
- * metodusokkal tortenik.
+ * metodusokkal tortenik. Eredmenykent {@link TestResult} objektumokat kapunk.
  * @author Gaspar Tamas
  */
 public class TestRunner {
@@ -30,14 +30,21 @@ public class TestRunner {
 	/** A teszt eredmenyeit, warningokat gyujt ossze. */
 	private TestResult.Builder resultBuilder = new TestResult.Builder();
 	
-	/** Privat konstruktor. */
+	/** Privat konstruktor, a {@link #testClass(Class)} metodust kell hasznalni. */
 	private TestRunner(Class<?> clazz) throws TestException {
 		this.clazz = clazz;
 		if(!clazz.isAnnotationPresent(TestCase.class)) { //annotacio ellenorzes
 			throw new TestException("Missing @TestCase on class " + clazz.getSimpleName());
 		} else { //annotacio ott van, adattagok elkerese
 			TestCase testCase = clazz.getAnnotation(TestCase.class);
+			if(testCase.timeLimit() <= 0 ) {
+				throw new TestException(testCase.timeLimit() + " is an invalid time limit for class " + clazz.getSimpleName());
+			}
 			resultBuilder.withTimeLimit(testCase.timeLimit()); //time limit elmentese
+			if(testCase.errorTolerance() < 0 || testCase.errorTolerance() > 1) {
+				throw new TestException(testCase.errorTolerance() + " is an invalid error tolarance for class " + clazz.getSimpleName() + ". Must be between 0 and 1.");
+			}
+			resultBuilder.withErrorTolerance(testCase.errorTolerance());
 		}
 		try {
 			clazz.getConstructor(); //deafult konstruktor elkerese
@@ -52,6 +59,7 @@ public class TestRunner {
 	 * Lefuttatja az adott osztaly teszt metodusait.
 	 * @param clazz Az adott osztaly.
 	 * @throws TestException Ha az adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora.
+	 * @return A teszteles eredmenye, {@link TestResult} objektum.
 	 */
 	public static TestResult testClass(Class<?> clazz) throws TestException {
 		try {
@@ -65,6 +73,7 @@ public class TestRunner {
 	 * Lefuttatja az osszes adott osztaly teszt metodusat, minden osztalyt sajat szalon.
 	 * @param classes Az adott osztalyok.
 	 * @throws TestException Ha barmelyik adott osztaly nem annotalt TestCase-el, vagy nincs default konstruktora.
+	 * @return {@link TestResult} objektumok listaja, a megadott sorrendben tartalmazza az eredmenyeket.
 	 */
 	public static List<TestResult> testClasses(Class<?>...classes) throws TestException {
 		int threadNum = Math.min(classes.length, Runtime.getRuntime().availableProcessors());
@@ -92,7 +101,8 @@ public class TestRunner {
 	}
 	
 	/** 
-	 * Elvegzi a tesztelest a metodus listazo altal megadott metodusokkal.
+	 * Elvegzi a tesztelest a metodus listazo altal megadott metodusokkal. Ez privat es magatol meghivodik, 
+	 * {@link #testClass(Class)}-ot kell hasznalni.
 	 * @return A teszt eredmenyt tartalmazo objektum.
 	 */
 	private TestResult doClassTest() throws IllegalAccessException, InstantiationException, TestException {
@@ -126,7 +136,7 @@ public class TestRunner {
 	}
 	
 	/**
-	 * Meghivja a teszt metodust es osszeallitja az eredmeny objktumot.
+	 * Meghiv egy teszt metodust es osszeallitja az eredmeny objktumot.
 	 * @param testMethod A tesztelendo metodus.
 	 * @param testInstance A teszt osztaly peldanya.
 	 * @return A teszt eredmenye.

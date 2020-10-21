@@ -1,6 +1,9 @@
 package com.gaspar.unittest.results;
 
-/** Teszteset megszakadasanak okat tartalmazza. */
+/** 
+ * Teszteset megszakadasanak okat tartalmazza.
+ * @see TestResult
+ */
 public class InterruptCause {
 
 	/** Ez a kivetel okozta a megszakadast. */

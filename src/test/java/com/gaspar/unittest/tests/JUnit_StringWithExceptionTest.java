@@ -8,9 +8,6 @@ import com.gaspar.unittest.TestRunner;
 import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.samples.StringWithExceptionTest;
 
-/**
- * JUnit-tal teszteli a {@link StringWithExceptionTest} osztaly teszteredmenyet.
- */
 public class JUnit_StringWithExceptionTest {
 
 	//azt varjuk, hogy a teszteles INTERRUPTED lesz, mert az @BeforeClass kivetelt dob

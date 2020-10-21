@@ -7,7 +7,7 @@ import com.gaspar.unittest.annotations.Test;
 import com.gaspar.unittest.annotations.Before;
 import com.gaspar.unittest.annotations.TestCase;
 
-/** Ugyanaz mint az ArithmeticTest, de minden teszt metodus el van rontva valamivel, ami warningokat eredmenyez. */
+/** Ugyanaz mint az {@link ArithmeticTest}, de minden teszt metodus el van rontva valamivel, ami warningokat eredmenyez. */
 @TestCase
 public class ArithmeticWithWarningsTest {
 

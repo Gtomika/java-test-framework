@@ -10,9 +10,6 @@ import com.gaspar.unittest.results.ResultStatus;
 import com.gaspar.unittest.results.TestResult;
 import com.gaspar.unittest.samples.StringWithTimeLimitTest;
 
-/**
- * JUnit-tal teszteli a {@link StringWithTimeLimitTest} osztaly teszteredmenyet.
- */
 public class JUnit_StringWithTimeLimitTest {
 
 	private static TestResult result;

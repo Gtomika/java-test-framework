@@ -14,11 +14,6 @@ import com.gaspar.unittest.samples.ArithmeticTest;
 import com.gaspar.unittest.samples.ArithmeticWithWarningsTest;
 import com.gaspar.unittest.samples.StringTest;
 
-/**
- * JUnit-tal tesztel egy olyan esetet, ahol tobb osztaly teszteleset vegezzuk sajat 
- * framework-kel, tobb szalon.
- * @author Gaspar Tamas
- */
 public class MultipleCasesTest {
 
 	//tesztek eredmenye sajat framework-el.

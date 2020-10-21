@@ -1,5 +1,6 @@
 package com.gaspar.unittest.samples;
 
+import com.gaspar.unittest.TestRunner;
 import com.gaspar.unittest.annotations.After;
 import com.gaspar.unittest.annotations.AfterClass;
 import com.gaspar.unittest.annotations.AssertFalse;
@@ -9,8 +10,10 @@ import com.gaspar.unittest.annotations.BeforeClass;
 import com.gaspar.unittest.annotations.Skip;
 import com.gaspar.unittest.annotations.Test;
 import com.gaspar.unittest.annotations.TestCase;
+import com.gaspar.unittest.results.TestResult;
 
-@TestCase(timeLimit = 15) //15 ezred mp.
+/** Nagyjabol minden funkciot bemutato peldakod, ez nincs tesztelve, hanem a README-ben lathato. */
+@TestCase(timeLimit = 15, errorTolerance = 0.4) //15 ezred mp limit, 40% hibas lehet.
 public class AllFunctionsSample {
 
 	//tesztelendo metodus
@@ -47,10 +50,10 @@ public class AllFunctionsSample {
 	}
 	
 	@Test
-	@AssertFalse
+	@AssertFalse //ez sikertelen lesz, a 0.4-es hiba arany miatt az osztalyteszt sikeres lesz
 	public boolean testAdd2() {
 		System.out.println("Teszt add 2");
-		return add(10,0) == 11;
+		return add(10,0) == 10;
 	}
 	
 	@Test
@@ -61,9 +64,14 @@ public class AllFunctionsSample {
 	}
 	
 	@Test
-	@Skip
+	@Skip //ez nem fog futni
 	public boolean testAdd4() {
 		System.out.println("Teszt add 4");
 		return add(3,3) == 6;
+	}
+	
+	public static void main(String[] args) {
+		TestResult res = TestRunner.testClass(AllFunctionsSample.class);
+		System.out.println(res);
 	}
 }

@@ -3,7 +3,7 @@ package com.gaspar.unittest.samples;
 import com.gaspar.unittest.annotations.*;
 
 /**
- *  Ugyanaz, mint az ArithmeticTest, de itt a default konstruktor nem letezik/nem elerheto, 
+ *  Ugyanaz, mint az {@link ArithmeticTest}, de itt a default konstruktor nem letezik/nem elerheto, 
  *  ezert a teszt framework kivetelt dob ra.
  */
 @TestCase

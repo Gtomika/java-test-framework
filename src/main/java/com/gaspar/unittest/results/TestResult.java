@@ -9,45 +9,63 @@ import com.gaspar.unittest.annotations.TestCase;
 /** 
  * Egy osztaly tesztelesenek az eredmenyet tartalmazza.
  * Szep megjelenites biztositva van a {@link #toString()} metodussal.
+ * @author Gaspar Tamas
  */
 public class TestResult {
 
 	/**
-	 *  Megmondja hogy sikeres-e ez az osztaly teszt. Pontosan akkor sikeres, ha: 
-	 *  - Minden teszmetodus tesztelese sikeres ES
+	 *  Megmondja hogy sikeres-e ez az osztaly teszt. Pontosan akkor {@link ResultStatus#SUCCESS}, ha: 
+	 *  - A kapott hiba tolerancianak ({@link #errorTolerance}) megfelelo szamu teszmetodus tesztelese sikeres ES
 	 *  - A teszteles idoben befejezodik, ha volt megadva idokorlat.
-	 *  Ha nem sikeres akkor FAIL vagy INTERRUPTED.
-	 *  Interrupt eseten a InterruptCause objektumban van a megszakitas oka.
+	 *  Ha nem sikeres akkor {@link ResultStatus#FAIL} vagy {@link ResultStatus#INTERRUPTED}.
+	 *  {@link ResultStatus#INTERRUPTED} eseten {@link #interruptCause}-ban van a megszakitas oka.
 	 */
 	private ResultStatus status;
 	/** A tesztelt osztaly neve */
 	private final String className;
-	/** Az osztaly tesztelese soran talalt problemak (szöveges formaban). */
+	/**
+	 *  Az osztaly tesztelese soran talalt problemak (szöveges formaban).
+	 *  Formazottan kiirathato a {@link #printWarnings()} es {@link #printWarnings(PrintStream)} metodusokkal.
+	 */
 	private final List<String> warnings;
 	/** A teszt metodusok futtatasanak eredmenyei. */
 	private final List<MethodTestResult> methodResults;
-	/** A sikeres, sikertelen és hibasan futo tesztek szama. */
-	private int successfulTestCount, failedTestCount, interruptedTestCount;
+	/** A sikeres tesztek szama. */
+	private int successfulTestCount;
+	/** A nem sikeres tesztek szama. */
+	private int failedTestCount;
+	/** A megszakadt tesztek szama. */
+	private int interruptedTestCount;
+	/** A megadott idokorlat. Ha nem volt megadva, akkor a limit {@link TestCase#NO_TIME_LIMIT}. */
+	private final long testTimeLimit;
+	/** A teszteles tenyleges ideje. */
+	private final long testTime;
 	/**
-	 *  A megadott idokorlat és a teszeles tenyleges ideje.
-	 *  Ha idokerlat nem volt megadva, akkor a limit 
-	 */
-	private final long testTimeLimit, testTime;
-	/**
-	 * Ha megszakadt a teszt (status == INTERRUPTED), akkor ez tartalmazza az 
+	 * Ha megszakadt a teszt ({@link #status} == {@link ResultStatus#INTERRUPTED}), akkor ez tartalmazza az 
 	 * okot. Egyebkent null.
 	 */
 	private final InterruptCause interruptCause;
+	/**
+	 * Elfogadott hibaarany. Ha ez X, akkor az osztaly tesztelese meg akkor 
+	 * is sikeres lesz, ha a tesztek X szazaleka nem sikeres.
+	 */
+	private final double errorTolerance;
+	/** A sikeres tesztek aranya. */
+	private final double successRatio;
 	
-	/** Privat konstruktor, helyette builder-t kell hasznalni. */
+	/**
+	 *  Privat konstruktor, helyette builder-t kell hasznalni!
+	 *  @see Builder
+	 */
 	private TestResult(String className, List<String> warnings, List<MethodTestResult> methodResults,
-			long testTimeLimit, long testTime, InterruptCause interruptCause) {
+			long testTimeLimit, long testTime, InterruptCause interruptCause, double errorTolerance) {
 		this.className = className;
 		this.warnings = warnings;
 		this.methodResults = methodResults;
 		this.testTimeLimit = testTimeLimit;
 		this.testTime = testTime;
 		this.interruptCause = interruptCause;
+		this.errorTolerance = errorTolerance;
 		for(MethodTestResult methodResult: this.methodResults) { //eredmeny tipusok szamlalasa
 			switch(methodResult.getStatus()) {
 			case SUCCESS:
@@ -61,14 +79,19 @@ public class TestResult {
 				break;
 			}
 		}
+		this.successRatio = Double.valueOf(successfulTestCount) / getTestCount();
 		//sikeresseg eldontese
 		if(this.interruptCause == null) { //nem volt megszakadas
-			if(successfulTestCount == getTestCount()) { //minden tesztmetodus sikeres
+			
+			if((1 - this.successRatio) <= this.errorTolerance) { //megfelelo szamu tesztmetodus sikeres
+				
 				if(this.testTimeLimit != TestCase.NO_TIME_LIMIT) { //volt idokorlat
 					status = this.testTime <= this.testTimeLimit ? ResultStatus.SUCCESS : ResultStatus.FAIL;
 				} else { //nem volt idokorlat
 					status = ResultStatus.SUCCESS;
 				}
+			} else { //nem eleg metodus lett sikeres
+				status = ResultStatus.FAIL;
 			}
 		} else { //megszakadt
 			status = ResultStatus.INTERRUPTED;
@@ -88,6 +111,13 @@ public class TestResult {
 				sb.append("there was no time limit.\n");
 			} else {
 				sb.append("time limit was " + testTimeLimit + ".\n");
+			}
+			//hiba arany mutatasa
+			sb.append("Sucess ratio was " + percent(successRatio) + "%, ");
+			if((1 - successRatio) >= errorTolerance) {
+				sb.append("but only " + percent(errorTolerance) + "% error tolerance was allowed!\n");
+			} else {
+				sb.append("which is allowed by the " + percent(errorTolerance) + "% error tolerance.\n");
 			}
 			
 			if(methodResults.size() > 0) {
@@ -111,8 +141,15 @@ public class TestResult {
 		return sb.toString();
 	}
 	
+	/** Szazalekra konvertalo segedmetodus. */
+	private int percent(double d) {
+		return (int)(100*d);
+	}
+	
 	/** 
 	 * Metodusnev alapjan elkeri az adott metodus teszt eredmenyet.
+	 * @param methodName A kert metodus neve.
+	 * @return Az eredmeny, ami egy {@link MethodTestResult}} objektum.
 	 * @throws NoSuchMethodException he nincs ilyen nevu metodus.
 	 */
 	public MethodTestResult getMethodResultByName(String methodName) throws NoSuchMethodException {
@@ -122,7 +159,10 @@ public class TestResult {
 		throw new NoSuchMethodException(methodName);
 	}
 	
-	/** Kiirja a megadott stream-re a warningokat. */
+	/**
+	 *  Kiirja a warningokat.
+	 *  @param printStream Az a {@link PrintStream} amire irodik az eredmeny.
+	 */
 	public void printWarnings(final PrintStream printStream) {
 		printStream.println(warnings.size() + " warnings were found while testing class " + className + ".");
 		for(String warning: warnings) {
@@ -174,10 +214,20 @@ public class TestResult {
 	public long getTestTime() {
 		return testTime;
 	}
+	
+	public double getErrorTolerance() {
+		return errorTolerance;
+	}
 
+	public double getSuccessRatio() {
+		return successRatio;
+	}
 
-
-	/** TestResult objektumok keszitesehez. */
+	/**
+	 * Builder {@link TestResult} objektumok keszitesehez. Adattagok nincsenek dokumentalva, mert azok 
+	 * ugyanazok mint a {@link TestResult} eseten. 
+	 * @see TestResult 
+	 */
 	public static class Builder {
 		
 		private final List<String> warnings = new ArrayList<>();
@@ -185,6 +235,7 @@ public class TestResult {
 		private final List<MethodTestResult> methodResults = new ArrayList<>();
 		private long timeLimit = TestCase.NO_TIME_LIMIT, testTime;
 		private InterruptCause interruptCause = null;
+		private double errorTolerance = 0;
 		
 		public void withClassName(String className) {
 			this.className = className;
@@ -202,6 +253,10 @@ public class TestResult {
 			this.interruptCause = interruptCause;
 		}
 		
+		public void withErrorTolerance(double errorTolerance) {
+			this.errorTolerance  = errorTolerance;
+		}
+		
 		public void addResult(MethodTestResult methodResult) {
 			methodResults.add(methodResult);
 		}
@@ -210,9 +265,12 @@ public class TestResult {
 			warnings.add(warning);
 		}
 		
-		/** Aktualis allapotbol elkesziti az objektumot. */
+		/**
+		 *  Aktualis allapotbol elkesziti a {@link TestResult} objektumot.
+		 *  @return A teszt eredmenye.
+		 */
 		public TestResult build() {
-			return new TestResult(className, warnings, methodResults, timeLimit, testTime, interruptCause);
+			return new TestResult(className, warnings, methodResults, timeLimit, testTime, interruptCause, errorTolerance);
 		}
 	}
 }

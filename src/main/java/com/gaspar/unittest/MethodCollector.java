@@ -39,13 +39,18 @@ class MethodCollector {
 	/** A listazas soran talalt problemakat gyujti ossze. */
 	private final TestResult.Builder resultBuilder;
 	
+	/**
+	 * Konstruktor.
+	 * @param clazz Az osztaly aminek listazni kell a metodusait.
+	 * @param resultBuilder Az osztaly teszteredmenyenek buildere.
+	 */
 	MethodCollector(Class<?> clazz, final TestResult.Builder resultBuilder) {
 		methods = Arrays.asList(clazz.getDeclaredMethods());
 		this.resultBuilder = resultBuilder;
 		listMethods(); //azonnal listaz
 	}
 	
-	/** Feltolti a metodus listakat. */
+	/** Feltolti a metodus listakat. Nem kell meghivni, mar a konstruktorban hivodik. */
 	private void listMethods() {
 		for(Method method: methods) {
 			if(method.isAnnotationPresent(Skip.class) || method.getAnnotations().length == 0) { //skip-es és annotacio nelkuli ignoralasa
@@ -82,12 +87,14 @@ class MethodCollector {
 	/**
 	 *  Megnezi, hogy a kapott metodus érvényes tesztmetodus-e.
 	 *  A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Ervenyes, ha:
-	 *  	- van rajta Test annotáció
-	 *  	- nincs rajta elvárt visszatérési érték jelző (ekkor true lesz), vagy pontosan egy van rajta (AssertTrue, AssertFalse, AssertThrow).
-	 *  	- nincs rajta egyéb annotáció, pl Before, Skip.
-	 *  	- nincs parametere
-	 *  	- boolean a visszateresi erteke (meg akkor is, ha kivetelt varunk el tole)
-	 *  	- nem statikus, és public
+	 *  <ul>
+	 *  	<li> van rajta Test annotáció</li>
+	 *  	<li> nincs rajta elvárt visszatérési érték jelző (ekkor true lesz), vagy pontosan egy van rajta (AssertTrue, AssertFalse, AssertThrow).</li>
+	 *  	<li> nincs rajta egyéb annotáció, pl Before, Skip.</li>
+	 *  	<li> nincs parametere</li>
+	 *  	<li> boolean a visszateresi erteke (meg akkor is, ha kivetelt varunk el tole)</li>
+	 *  	<li> nem statikus, és public</li>
+	 *  </ul>
 	 */
 	private boolean validTestMethod(final Method method) {
 		boolean isValid = true;
@@ -128,10 +135,12 @@ class MethodCollector {
 	/**
 	 * Megnezi, hogy az adott metodus valid Before, minden teszt elott futtatando metodus.
 	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
-	 * 	- Nincs rajta Skip, Test, After, BeforeClass, AfterClass
-	 * 	- Van rajta Before
-	 *  - Nincs paramétere, se visszatérési értéke
-	 *  - Nem statikus és public
+	 * <ul>
+	 * 	<li> Nincs rajta Skip, Test, After, BeforeClass, AfterClass</li>
+	 * 	<li> Van rajta Before</li>
+	 *  <li> Nincs paramétere, se visszatérési értéke</li>
+	 *  <li> Nem statikus és public</li>
+	 *  </ul>
 	 */
 	private boolean validBeforeMethod(final Method method) {
 		boolean isValid = true;
@@ -165,10 +174,12 @@ class MethodCollector {
 	/**
 	 * Megnezi, hogy az adott metodus valid BeforeClass, tesztek elott egyszer futtatando metodus.
 	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
-	 * 	- Nincs rajta Skip, Test, After, Before, AfterClass
-	 * 	- Van rajta BeforeClass
-	 *  - Nincs paramétere, se visszatérési értéke
-	 *  - Statikus és public
+	 * <ul>
+	 * 	<li> Nincs rajta Skip, Test, After, Before, AfterClass</li>
+	 * 	<li> Van rajta BeforeClass</li>
+	 *  <li> Nincs paramétere, se visszatérési értéke</li>
+	 *  <li> Statikus és public</li>
+	 *  </ul>
 	 */
 	private boolean validBeforeClassMethod(final Method method) {
 		boolean isValid = true;
@@ -202,10 +213,12 @@ class MethodCollector {
 	/**
 	 * Megnezi, hogy az adott metodus valid After, minden teszt utan futtatando metodus.
 	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
-	 * 	- Nincs rajta Skip, Test, Before, BeforeClass, AfterClass
-	 * 	- Van rajta After
-	 *  - Nincs paramétere, se visszatérési értéke
-	 *  - Nem statikus és public
+	 * <ul>
+	 * 	<li> Nincs rajta Skip, Test, Before, BeforeClass, AfterClass</li>
+	 * 	<li> Van rajta After</li>
+	 *  <li> Nincs paramétere, se visszatérési értéke</li>
+	 *  <li> Nem statikus és public</li>
+	 * </ul>
 	 */
 	private boolean validAfterMethod(final Method method) {
 		boolean isValid = true;
@@ -239,10 +252,12 @@ class MethodCollector {
 	/**
 	 * Megnezi, hogy az adott metodus valid AfterClass, tesztek utan egyszer futtatando metodus.
 	 * A kapott metoduson biztosan van egy nem Skip annotacio, skip biztosan nincs rajta. Valid, ha:
-	 * 	- Nincs rajta Skip, Test, After, Before, BeforeClass
-	 * 	- Van rajta AfterClass
-	 *  - Nincs paramétere, se visszatérési értéke
-	 *  - Statikus és public
+	 * <ul>
+	 * 	<li> Nincs rajta Skip, Test, After, Before, BeforeClass</li>
+	 * 	<li> Van rajta AfterClass</li>
+	 *  <li> Nincs paramétere, se visszatérési értéke</li>
+	 *  <li> Statikus és public</li>
+	 *  </ul>
 	 */
 	private boolean validAfterClassMethod(final Method method) {
 		boolean isValid = true;

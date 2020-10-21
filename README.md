@@ -45,7 +45,7 @@ Ha egy ilyen metódus híváskor kivételt dob, akkor a tesztelés megszakad, IN
 ## Extrák
 Extra funkciók, amik a feladatban nincsenek benne, de implementálva vannak:
 - Időkorlát állítása az *@TestCase* annotációval. Az ezt túllépő teszt FAIL eredményű lesz. Opcionális, alapértelmezetten nincs korlát.
-- ~~Hibaarány állítása: megadható a @TestCase esetén egy 0 és 1 közötti hibaarány. Pl, ha ez 0.05, akkor ha a tesztek kevesebb mint 5% lesz rossz, az osztály teszt még sikeres lesz. Opcionális, alapértelmezetten ez 0, vagyis minden teszt sikere kell.~~ MÉG NINCS KÉSZ.
+- Hibaarány állítása: megadható a *@TestCase* esetén egy 0 és 1 közötti hibaarány. Pl, ha ez 0.05, akkor ha a tesztek kevesebb mint 5% lesz rossz, az osztály teszt még sikeres lesz. Opcionális, alapértelmezetten ez 0, vagyis minden teszt sikere kell.
 
 ## Példakódok, tesztek
 Példakódok és a framework tesztelése JUnit-tal az [src/test/java](http://vir.inf.u-szeged.hu:8181/Gtomika/UnitTest/tree/master/src/test/java/com/gaspar/unittest) mappában találhatóak.
@@ -53,7 +53,7 @@ Példakódok és a framework tesztelése JUnit-tal az [src/test/java](http://vir
 Itt egy egyszerű példa ami bemutat nagyjából minden funkciót:
 
 ```java
-@TestCase(timeLimit = 15) //15 ezred mp.
+@TestCase(timeLimit = 15, errorTolerance = 0.4) //15 ezred mp limit, 40% hibas lehet.
 public class AllFunctionsSample {
 
 	//tesztelendo metodus
@@ -90,10 +90,10 @@ public class AllFunctionsSample {
 	}
 	
 	@Test
-	@AssertFalse
+	@AssertFalse //ez sikertelen lesz, a 0.4-es hiba arany miatt az osztalyteszt sikeres lesz
 	public boolean testAdd2() {
 		System.out.println("Teszt add 2");
-		return add(10,0) == 11;
+		return add(10,0) == 10;
 	}
 	
 	@Test
@@ -104,7 +104,7 @@ public class AllFunctionsSample {
 	}
 	
 	@Test
-	@Skip
+	@Skip //ez nem fog futni
 	public boolean testAdd4() {
 		System.out.println("Teszt add 4");
 		return add(3,3) == 6;
@@ -126,26 +126,31 @@ A megjelenő output:
 ```
 Kezdodik a teszteles!
 Kezdodik egy metodusteszt!
+Teszt add 2
+Befejezodott egy metodusteszt!
+Kezdodik egy metodusteszt!
 Teszt add 1
 Befejezodott egy metodusteszt!
 Kezdodik egy metodusteszt!
 Teszt add 3
 Befejezodott egy metodusteszt!
-Kezdodik egy metodusteszt!
-Teszt add 2
-Befejezodott egy metodusteszt!
 Befejezodott a teszteles!
 --------------------------------------------------------------------------------------
 Result of testing for class com.gaspar.unittest.samples.AllFunctionsSample. Status: SUCCESS
-Testing took 3 milliseconds, time limit was 15.
+Testing took 4 milliseconds, time limit was 15.
+Sucess ratio was 66%, which is allowed by the 40% error tolerance.
 There were a total of 3 tests run,
-out of which 3 succeded, 0 failed and 0 were unexpectedly interrupted.
+out of which 2 succeded, 1 failed and 0 were unexpectedly interrupted.
 
 Detailed reports for each test method:
+- Method: testAdd2, result: FAIL
+Expected result: false, actual result: true
 - Method: testAdd1, result: SUCCESS
 Expected result: true, actual result: true
 - Method: testAdd3, result: SUCCESS
 Expected result: NullPointerException, actual result: NullPointerException
-- Method: testAdd2, result: SUCCESS
-Expected result: false, actual result: false
+
 ```
+
+## Dokumentáció
+Javadoc segítségével, [index](http://vir.inf.u-szeged.hu:8181/Gtomika/UnitTest/tree/master/doc/index.html).

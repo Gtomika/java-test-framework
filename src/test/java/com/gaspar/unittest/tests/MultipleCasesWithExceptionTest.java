@@ -14,11 +14,6 @@ import com.gaspar.unittest.samples.ArithmeticTest;
 import com.gaspar.unittest.samples.StringTest;
 import com.gaspar.unittest.samples.StringWithExceptionTest;
 
-/**
- * JUnit-tal tesztel egy olyan esetet, ahol tobb osztaly teszteleset vegezzuk sajat 
- * framework-kel, tobb szalon ES az egyik osztaly kivetelt dob (azaz az eredmeny INTERRUPTED lesz.
- * @author Gaspar Tamas
- */
 public class MultipleCasesWithExceptionTest {
 	
 	private static List<TestResult> results;
