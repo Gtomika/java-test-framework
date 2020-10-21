@@ -18,7 +18,7 @@ public class JUnit_StringWithTimeLimitTest {
 	public static void performTest() {
 		try {
 			result = TestRunner.testClass(StringWithTimeLimitTest.class);
-			System.out.println(result);
+			//System.out.println(result);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

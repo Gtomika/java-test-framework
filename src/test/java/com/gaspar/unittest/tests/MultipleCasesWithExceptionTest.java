@@ -21,7 +21,7 @@ public class MultipleCasesWithExceptionTest {
 	@BeforeClass
 	public static void doTests() {
 		results = TestRunner.testClasses(ArithmeticTest.class, StringTest.class, StringWithExceptionTest.class);
-		results.forEach(System.out::println);
+		//results.forEach(System.out::println);
 	}
 	
 	@Test

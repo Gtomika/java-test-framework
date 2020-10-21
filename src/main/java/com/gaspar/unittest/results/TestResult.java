@@ -114,7 +114,7 @@ public class TestResult {
 			}
 			//hiba arany mutatasa
 			sb.append("Sucess ratio was " + percent(successRatio) + "%, ");
-			if((1 - successRatio) >= errorTolerance) {
+			if((1 - successRatio) > errorTolerance) {
 				sb.append("but only " + percent(errorTolerance) + "% error tolerance was allowed!\n");
 			} else {
 				sb.append("which is allowed by the " + percent(errorTolerance) + "% error tolerance.\n");

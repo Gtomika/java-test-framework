@@ -27,8 +27,10 @@ public class MultipleCasesTest {
 	}
 	
 	@Test
-	public void testAllSuccess() {
-		assertTrue(results.stream().allMatch(res -> res.getStatus() == ResultStatus.SUCCESS));
+	public void testResults() {
+		assertTrue(results.get(0).getStatus() == ResultStatus.SUCCESS &&
+				   results.get(1).getStatus() == ResultStatus.FAIL &&  //itt 1 teszt sem futtot le, fail
+				   results.get(2).getStatus() == ResultStatus.SUCCESS);
 	}
 	
 	@Test

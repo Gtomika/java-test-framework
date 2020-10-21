@@ -37,7 +37,7 @@ public class TestRunner {
 			throw new TestException("Missing @TestCase on class " + clazz.getSimpleName());
 		} else { //annotacio ott van, adattagok elkerese
 			TestCase testCase = clazz.getAnnotation(TestCase.class);
-			if(testCase.timeLimit() <= 0 ) {
+			if(testCase.timeLimit() <= 0 && testCase.timeLimit() != TestCase.NO_TIME_LIMIT) {
 				throw new TestException(testCase.timeLimit() + " is an invalid time limit for class " + clazz.getSimpleName());
 			}
 			resultBuilder.withTimeLimit(testCase.timeLimit()); //time limit elmentese
